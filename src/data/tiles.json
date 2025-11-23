@@ -1,0 +1,44 @@
+{
+  "man": [
+    { "id": "Man1", "name": "1-Man", "kanji": "一萬", "romaji": "Ii-wan" },
+    { "id": "Man2", "name": "2-Man", "kanji": "二萬", "romaji": "Ryan-wan" },
+    { "id": "Man3", "name": "3-Man", "kanji": "三萬", "romaji": "San-wan" },
+    { "id": "Man4", "name": "4-Man", "kanji": "四萬", "romaji": "Suu-wan" },
+    { "id": "Man5", "name": "5-Man", "kanji": "五萬", "romaji": "Uu-wan" },
+    { "id": "Man6", "name": "6-Man", "kanji": "六萬", "romaji": "Rou-wan" },
+    { "id": "Man7", "name": "7-Man", "kanji": "七萬", "romaji": "Chii-wan" },
+    { "id": "Man8", "name": "8-Man", "kanji": "八萬", "romaji": "Paa-wan" },
+    { "id": "Man9", "name": "9-Man", "kanji": "九萬", "romaji": "Kyuu-wan" }
+  ],
+  "pin": [
+    { "id": "Pin1", "name": "1-Pin", "kanji": "一筒", "romaji": "Ii-pin" },
+    { "id": "Pin2", "name": "2-Pin", "kanji": "二筒", "romaji": "Ryan-pin" },
+    { "id": "Pin3", "name": "3-Pin", "kanji": "三筒", "romaji": "San-pin" },
+    { "id": "Pin4", "name": "4-Pin", "kanji": "四筒", "romaji": "Suu-pin" },
+    { "id": "Pin5", "name": "5-Pin", "kanji": "五筒", "romaji": "Uu-pin" },
+    { "id": "Pin6", "name": "6-Pin", "kanji": "六筒", "romaji": "Rou-pin" },
+    { "id": "Pin7", "name": "7-Pin", "kanji": "七筒", "romaji": "Chii-pin" },
+    { "id": "Pin8", "name": "8-Pin", "kanji": "八筒", "romaji": "Paa-pin" },
+    { "id": "Pin9", "name": "9-Pin", "kanji": "九筒", "romaji": "Kyuu-pin" }
+  ],
+  "sou": [
+    { "id": "Sou1", "name": "1-Sou", "kanji": "一索", "romaji": "Ii-sou" },
+    { "id": "Sou2", "name": "2-Sou", "kanji": "二索", "romaji": "Ryan-sou" },
+    { "id": "Sou3", "name": "3-Sou", "kanji": "三索", "romaji": "San-sou" },
+    { "id": "Sou4", "name": "4-Sou", "kanji": "四索", "romaji": "Suu-sou" },
+    { "id": "Sou5", "name": "5-Sou", "kanji": "五索", "romaji": "Uu-sou" },
+    { "id": "Sou6", "name": "6-Sou", "kanji": "六索", "romaji": "Rou-sou" },
+    { "id": "Sou7", "name": "7-Sou", "kanji": "七索", "romaji": "Chii-sou" },
+    { "id": "Sou8", "name": "8-Sou", "kanji": "八索", "romaji": "Paa-sou" },
+    { "id": "Sou9", "name": "9-Sou", "kanji": "九索", "romaji": "Kyuu-sou" }
+  ],
+  "honors": [
+    { "id": "Ton", "name": "East Wind", "kanji": "東", "romaji": "Ton" },
+    { "id": "Shaa", "name": "South Wind", "kanji": "南", "romaji": "Nan" },
+    { "id": "Pei", "name": "West Wind", "kanji": "西", "romaji": "Shaa" },
+    { "id": "Nan", "name": "North Wind", "kanji": "北", "romaji": "Pei" },
+    { "id": "Haku", "name": "White Dragon", "kanji": "白", "romaji": "Haku" },
+    { "id": "Hatsu", "name": "Green Dragon", "kanji": "發", "romaji": "Hatsu" },
+    { "id": "Chun", "name": "Red Dragon", "kanji": "中", "romaji": "Chun" }
+  ]
+}
