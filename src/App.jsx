@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import tiles from './data/tiles.json';
 import './App.css';
 
@@ -9,8 +9,12 @@ function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
+  const [shuffled, setShuffled] = useState(false);
+  const [dragStart, setDragStart] = useState(null);
+  const [dragging, setDragging] = useState(false);
 
-  // Initialize flashcards
+  const cardRef = useRef(null);
+
   const allFlashcards = [
     ...tiles.man,
     ...tiles.pin,
@@ -21,12 +25,12 @@ function App() {
 
   const [remainingCards, setRemainingCards] = useState([...allFlashcards]);
   const totalCards = allFlashcards.length;
-
   const currentCard = remainingCards[currentIndex] || null;
 
-  const handleFlip = () => setFlipped(prev => !prev);
+  const handleFlip = () => {
+    if (!dragging) setFlipped(prev => !prev);
+  };
 
-  // Handle indicating tile
   const handleMoveNext = (direction) => {
     if (!currentCard || swipeDirection) return;
 
@@ -37,11 +41,9 @@ function App() {
       let newCards = [...remainingCards];
 
       if (direction === 'right') {
-        // Correct: remove card
         newCards.splice(currentIndex, 1);
         setCorrectCount(prev => prev + 1);
       } else {
-        // Wrong or skipped: move card to end
         newCards.push(newCards.splice(currentIndex, 1)[0]);
       }
 
@@ -58,13 +60,34 @@ function App() {
 
   const toggleContrast = () => setHighContrast(prev => !prev);
 
-  // Reset progress handler
   const resetProgress = () => {
     setRemainingCards([...allFlashcards]);
     setCurrentIndex(0);
     setCorrectCount(0);
     setFlipped(false);
     setSwipeDirection(null);
+    setShuffled(false);
+  };
+
+  const toggleShuffle = () => {
+    setFlipped(false);
+
+    setTimeout(() => {
+      if (!shuffled) {
+        const shuffledCards = [...remainingCards];
+        for (let i = shuffledCards.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
+        }
+        setRemainingCards(shuffledCards);
+      } else {
+        const ordered = allFlashcards.filter(c => remainingCards.includes(c));
+        setRemainingCards(ordered);
+      }
+
+      setShuffled(prev => !prev);
+      setCurrentIndex(0);
+    }, 150);
   };
 
   const tileFolder = highContrast ? 'dark' : 'regular';
@@ -97,11 +120,45 @@ function App() {
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [currentCard, swipeDirection]);
+  }, [currentCard, swipeDirection, dragging]);
+
+  // Drag handlers
+  const handleDragStart = (e) => {
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setDragging(false);
+  };
+
+  const handleDragMove = (e) => {
+    if (!dragStart) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) setDragging(true);
+  };
+
+  const handleDragEnd = (e) => {
+    if (!dragStart || !dragging) {
+      setDragStart(null);
+      setDragging(false);
+      return;
+    }
+
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+
+    // Determine direction
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0) handleMoveNext('right');
+      else handleMoveNext('left');
+    } else if (dy < 0) {
+      handleMoveNext('up');
+    }
+
+    setDragStart(null);
+    setDragging(false);
+  };
 
   return (
     <div className="container text-center mt-5">
-      {/* LOGO */}
       <img
         src={logoPath}
         alt="Yaku Up Logo"
@@ -109,24 +166,28 @@ function App() {
         onClick={handleLogoClick}
       />
 
-      {/* HIGH CONTRAST TOGGLE */}
       <button className="contrast-toggle" onClick={toggleContrast}>
         {highContrast ? '🌙' : '☀️'}
       </button>
 
-      {/* PROGRESS */}
       <p className="progress-text">
         Progress: {correctCount} / {totalCards}
       </p>
 
-      {/* CURRENT PROGRESS */}
       {currentCard ? (
         <div
           className={`tile-card ${swipeDirection ? `swipe-${swipeDirection}` : ''}`}
           onClick={handleFlip}
+          ref={cardRef}
+          onMouseDown={handleDragStart}
+          onMouseMove={handleDragMove}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={(e) => handleDragStart(e.touches[0])}
+          onTouchMove={(e) => handleDragMove(e.touches[0])}
+          onTouchEnd={(e) => handleDragEnd(e.changedTouches[0])}
         >
           <div className={`tile-inner ${flipped ? 'flipped' : ''}`}>
-            {/* FRONT */}
             <div className="tile-face tile-front">
               <div
                 className="tile-frame"
@@ -141,7 +202,6 @@ function App() {
               </div>
             </div>
 
-            {/* BACK */}
             <div className="tile-face tile-back">
               <h4>{currentCard.name}</h4>
               <p className="fs-1">{currentCard.kanji}</p>
@@ -161,10 +221,18 @@ function App() {
         </>
       )}
 
-      {/* RESET PROGRESS */}
-      <button className="reset-btn mt-2" onClick={resetProgress}>
-        Reset Progress
-      </button>
+      {/* Reset and Shuffle Buttons */}
+      <div className="button-row">
+        <button className="reset-btn" onClick={resetProgress}>
+          Reset Progress
+        </button>
+
+        {currentCard && (
+          <button className="shuffle-btn" onClick={toggleShuffle}>
+            {shuffled ? '🔁 Unshuffle' : '🔀 Shuffle'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
