@@ -13,6 +13,14 @@ function App() {
   const [dragStart, setDragStart] = useState(null);
   const [dragging, setDragging] = useState(false);
 
+  const [enabledSets, setEnabledSets] = useState({
+    man: true,
+    pin: true,
+    sou: true,
+    winds: true,
+    dragons: true,
+  });
+
   const cardRef = useRef(null);
 
   const allFlashcards = [
@@ -23,8 +31,18 @@ function App() {
     ...tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id))
   ];
 
-  const [remainingCards, setRemainingCards] = useState([...allFlashcards]);
-  const totalCards = allFlashcards.length;
+  const filterEnabledCards = () => {
+    return [
+      ...(enabledSets.man ? tiles.man : []),
+      ...(enabledSets.pin ? tiles.pin : []),
+      ...(enabledSets.sou ? tiles.sou : []),
+      ...(enabledSets.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
+      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : [])
+    ];
+  };
+
+  const [remainingCards, setRemainingCards] = useState(filterEnabledCards());
+  const totalCards = filterEnabledCards().length;
   const currentCard = remainingCards[currentIndex] || null;
 
   const handleFlip = () => {
@@ -61,7 +79,8 @@ function App() {
   const toggleContrast = () => setHighContrast(prev => !prev);
 
   const resetProgress = () => {
-    setRemainingCards([...allFlashcards]);
+    const filtered = filterEnabledCards();
+    setRemainingCards(filtered);
     setCurrentIndex(0);
     setCorrectCount(0);
     setFlipped(false);
@@ -81,7 +100,7 @@ function App() {
         }
         setRemainingCards(shuffledCards);
       } else {
-        const ordered = allFlashcards.filter(c => remainingCards.includes(c));
+        const ordered = filterEnabledCards();
         setRemainingCards(ordered);
       }
 
@@ -145,7 +164,6 @@ function App() {
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
 
-    // Determine direction
     if (Math.abs(dx) > Math.abs(dy)) {
       if (dx > 0) handleMoveNext('right');
       else handleMoveNext('left');
@@ -156,6 +174,35 @@ function App() {
     setDragStart(null);
     setDragging(false);
   };
+
+  const toggleSet = (setName) => {
+    const newEnabled = { ...enabledSets, [setName]: !enabledSets[setName] };
+    setEnabledSets(newEnabled);
+    const filtered = [
+      ...(newEnabled.man ? tiles.man : []),
+      ...(newEnabled.pin ? tiles.pin : []),
+      ...(newEnabled.sou ? tiles.sou : []),
+      ...(newEnabled.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
+      ...(newEnabled.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : [])
+    ];
+    setRemainingCards(filtered);
+    setCurrentIndex(0);
+    setCorrectCount(0);
+    setFlipped(false);
+    setSwipeDirection(null);
+  };
+
+  const renderDoneCard = () => (
+    <div className="tile-card done-card">
+      <div className="tile-inner">
+        <div className="tile-face tile-front">
+
+          <p className="fs-4 mt-4 done-card-text"><b>Congrats! 🎉</b><br /><br /><i>Reset Progress</i> or enable new sets <br />to keep learning.</p>
+
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="container text-center mt-5">
@@ -203,25 +250,22 @@ function App() {
             </div>
 
             <div className="tile-face tile-back">
-              <h4>{currentCard.name}</h4>
-              <p className="fs-1">{currentCard.kanji}</p>
-              <p>"{currentCard.romaji}"</p>
+              <h4 className="prevent-select">{currentCard.name}</h4>
+              <p className="fs-1 prevent-select">{currentCard.kanji}</p>
+              <p className="prevent-select">"{currentCard.romaji}"</p>
             </div>
           </div>
         </div>
       ) : (
-        <p className="text mt-5 fs-3">You're done!</p>
+        renderDoneCard()
       )}
 
       {currentCard && (
-        <>
-          <p className="text mt-3">
-            Click the tile or press Space to flip. Use arrow keys →, ←, ↑ to move.
-          </p>
-        </>
+        <p className="text mt-3">
+          Click the tile or press Space to flip. Use arrow keys →, ←, ↑ to move.
+        </p>
       )}
 
-      {/* Reset and Shuffle Buttons */}
       <div className="button-row">
         <button className="reset-btn" onClick={resetProgress}>
           Reset Progress
@@ -233,6 +277,73 @@ function App() {
           </button>
         )}
       </div>
+
+      {/* Tile set toggles */}
+      <div className="tile-set-toggle mt-5">
+        <div
+          className={`toggle-tile-frame ${!enabledSets.man ? 'disabled' : ''}`}
+          onClick={() => toggleSet('man')}
+          style={{ backgroundImage: `url(${frontFrame})` }}
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Man1.png`}
+            alt="Man"
+            className="toggle-tile"
+          />
+        </div>
+
+        <div
+          className={`toggle-tile-frame ${!enabledSets.pin ? 'disabled' : ''}`}
+          onClick={() => toggleSet('pin')}
+          style={{ backgroundImage: `url(${frontFrame})` }}
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Pin1.png`}
+            alt="Pin"
+            className="toggle-tile"
+          />
+        </div>
+
+        <div
+          className={`toggle-tile-frame ${!enabledSets.sou ? 'disabled' : ''}`}
+          onClick={() => toggleSet('sou')}
+          style={{ backgroundImage: `url(${frontFrame})` }}
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Sou1.png`}
+            alt="Sou"
+            className="toggle-tile"
+          />
+        </div>
+
+        <div
+          className={`toggle-tile-frame ${!enabledSets.winds ? 'disabled' : ''}`}
+          onClick={() => toggleSet('winds')}
+          style={{ backgroundImage: `url(${frontFrame})` }}
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Ton.png`}
+            alt="Winds"
+            className="toggle-tile"
+          />
+        </div>
+
+        <div
+          className={`toggle-tile-frame ${!enabledSets.dragons ? 'disabled' : ''}`}
+          onClick={() => toggleSet('dragons')}
+          style={{ backgroundImage: `url(${frontFrame})` }}
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Hatsu.png`}
+            alt="Dragons"
+            className="toggle-tile"
+          />
+        </div>
+      </div>
+
+      <p className="text mt-2">
+        WARNING: Enabling or disabling sets will reset your progress.
+      </p>
     </div>
   );
 }
