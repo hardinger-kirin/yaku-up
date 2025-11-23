@@ -92,3 +92,54 @@
   z-index: 2;
 }
 
+/* HIGH CONTRAST TOGGLE BUTTON */
+.contrast-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--mahjong-offwhite);
+  transition: transform 0.2s ease;
+}
+
+.contrast-toggle:hover {
+  transform: scale(1.2);
+}
+
+/* LOGO in top-left */
+.logo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  z-index: 100;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* Hover scale effect */
+.logo:hover {
+  transform: scale(1.1);
+}
+
+/* Sway animation */
+@keyframes sway {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(15deg); }
+  30%  { transform: rotate(-15deg); }
+  45%  { transform: rotate(10deg); }
+  60%  { transform: rotate(-10deg); }
+  75%  { transform: rotate(5deg); }
+  90%  { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.logo.sway {
+  animation: sway 0.6s ease-in-out;
+}
+

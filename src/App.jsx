@@ -5,21 +5,40 @@ import './App.css';
 function App() {
   const chunTile = tiles.honors.find(t => t.id === 'Chun');
   const [flipped, setFlipped] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
+  const [logoClicked, setLogoClicked] = useState(false);
 
   const handleClick = () => setFlipped(!flipped);
+  const toggleContrast = () => setHighContrast(!highContrast);
 
-  const imagePath = `${import.meta.env.BASE_URL}/tiles/regular/Chun.png`;
-  const frontFrame = `${import.meta.env.BASE_URL}/tiles/regular/Front.png`;
+  const handleLogoClick = () => {
+    setLogoClicked(true);
+    setTimeout(() => setLogoClicked(false), 600); // duration matches animation
+  };
+
+  const tileFolder = highContrast ? 'dark' : 'regular';
+  const imagePath = `${import.meta.env.BASE_URL}/tiles/${tileFolder}/Chun.png`;
+  const frontFrame = `${import.meta.env.BASE_URL}/tiles/${tileFolder}/Front.png`;
+  const logoPath = `${import.meta.env.BASE_URL}/logo.png`;
 
   return (
     <div className="container text-center mt-5">
-      <h1 className="mb-4">Yaku Up!</h1>
-      <p>Learn Riichi Mahjong tiles and yaku through interactive flashcards.</p>
+      {/* Logo */}
+      <img
+        src={logoPath}
+        alt="Yaku Up Logo"
+        className={`logo ${logoClicked ? 'sway' : ''}`}
+        onClick={handleLogoClick}
+      />
+
+      {/* High Contrast Toggle */}
+      <button className="contrast-toggle" onClick={toggleContrast}>
+        {highContrast ? '🌙' : '☀️'}
+      </button>
 
       {/* CARD */}
       <div className="tile-card" onClick={handleClick}>
         <div className={`tile-inner ${flipped ? 'flipped' : ''}`}>
-
           {/* FRONT */}
           <div className="tile-face tile-front">
             <div
@@ -41,7 +60,6 @@ function App() {
             <p className="fs-1">{chunTile.kanji}</p>
             <p>"{chunTile.romaji}"</p>
           </div>
-
         </div>
       </div>
 
