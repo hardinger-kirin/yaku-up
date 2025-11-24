@@ -326,7 +326,7 @@ function App() {
 
       {currentCard && (
         <p className="text mt-3">
-          Click the tile or press Space to flip. Use arrow keys →, ←, ↑ to move.
+          Click the tile or press Space to flip.<br />Use arrow keys or drag the tile to mark correct (right) / incorrect (left).
         </p>
       )}
 
