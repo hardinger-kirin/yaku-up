@@ -272,6 +272,25 @@
   height: 70%;
 }
 
+.yaku-text {
+  color: var(--mahjong-green) !important;
+  font-weight: bold;
+}
+
+.high-contrast .yaku-text {
+  color: var(--mahjong-offwhite) !important;
+}
+
+.yaku-toggle-label {
+  color: var(--mahjong-green) !important;
+  font-weight: bold;
+}
+
+/* High Contrast mode override */
+.high-contrast .yaku-toggle-label {
+  color: var(--mahjong-offwhite) !important;
+}
+
 /* DONE CARD STYLE */
 .done-card {
   width: 200px;

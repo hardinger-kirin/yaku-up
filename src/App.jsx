@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import tiles from './data/tiles.json';
+import yakuList from './data/yaku.json';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     sou: true,
     winds: true,
     dragons: true,
+    yaku: true
   });
 
   const cardRef = useRef(null);
@@ -27,8 +29,9 @@ function App() {
     ...tiles.man,
     ...tiles.pin,
     ...tiles.sou,
+    ...tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)),
     ...tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)),
-    ...tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id))
+    ...yakuList
   ];
 
   const filterEnabledCards = () => {
@@ -36,8 +39,9 @@ function App() {
       ...(enabledSets.man ? tiles.man : []),
       ...(enabledSets.pin ? tiles.pin : []),
       ...(enabledSets.sou ? tiles.sou : []),
+      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : []),
       ...(enabledSets.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
-      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : [])
+      ...(enabledSets.yaku ? yakuList : [])
     ];
   };
 
@@ -66,8 +70,9 @@ function App() {
       }
 
       setRemainingCards(newCards);
+      const nextPos = findFirstEnabledPosition(newCards);
+      setCurrentIndex(nextPos);
       setSwipeDirection(null);
-      setCurrentIndex(0);
     }, 150);
   };
 
@@ -81,7 +86,9 @@ function App() {
   const resetProgress = () => {
     const filtered = filterEnabledCards();
     setRemainingCards(filtered);
-    setCurrentIndex(0);
+    const pos = findFirstEnabledPosition(filtered);
+    setRemainingCards(filtered);
+    setCurrentIndex(pos);
     setCorrectCount(0);
     setFlipped(false);
     setSwipeDirection(null);
@@ -92,22 +99,58 @@ function App() {
     setFlipped(false);
 
     setTimeout(() => {
-      if (!shuffled) {
-        const shuffledCards = [...remainingCards];
-        for (let i = shuffledCards.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
-        }
-        setRemainingCards(shuffledCards);
-      } else {
-        const ordered = filterEnabledCards();
-        setRemainingCards(ordered);
+      const enabledIds = new Set(filterEnabledCards().map(c => c.id));
+      const enabledPositions = [];
+      for (let i = 0; i < remainingCards.length; i++) {
+        if (enabledIds.has(remainingCards[i].id)) enabledPositions.push(i);
       }
 
+      let newCards = [...remainingCards];
+
+      if (!shuffled) {
+        // shuffle only enabled cards
+        const enabledCards = enabledPositions.map(i => remainingCards[i]);
+        for (let i = enabledCards.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [enabledCards[i], enabledCards[j]] = [enabledCards[j], enabledCards[i]];
+        }
+        enabledPositions.forEach((pos, idx) => { newCards[pos] = enabledCards[idx]; });
+      } else {
+        // unshuffle: restore natural order for enabled cards only
+        const naturalOrder = filterEnabledCards();
+        const naturalIndex = Object.fromEntries(naturalOrder.map((c, idx) => [c.id, idx]));
+        const enabledCards = enabledPositions.map(i => remainingCards[i]);
+        enabledCards.sort((a, b) => {
+          const ai = naturalIndex[a.id];
+          const bi = naturalIndex[b.id];
+          if (ai === undefined && bi === undefined) return 0;
+          if (ai === undefined) return 1;
+          if (bi === undefined) return -1;
+          return ai - bi;
+        });
+        enabledPositions.forEach((pos, idx) => { newCards[pos] = enabledCards[idx]; });
+      }
+
+      setRemainingCards(newCards);
+      const nextPos = findFirstEnabledPosition(newCards);
+      setCurrentIndex(nextPos);
       setShuffled(prev => !prev);
-      setCurrentIndex(0);
     }, 150);
   };
+
+
+  const findFirstEnabledPosition = (cards) => {
+    const enabledIds = new Set(filterEnabledCards().map(c => c.id));
+    for (let i = 0; i < cards.length; i++) {
+      if (enabledIds.has(cards[i].id)) return i;
+    }
+    return -1;
+  };
+
+  useEffect(() => {
+    const pos = findFirstEnabledPosition(remainingCards);
+    setCurrentIndex(pos);
+  }, [remainingCards, enabledSets]);
 
   const tileFolder = highContrast ? 'dark' : 'regular';
   const frontFrame = `${import.meta.env.BASE_URL}/tiles/${tileFolder}/Front.png`;
@@ -128,9 +171,6 @@ function App() {
           break;
         case 'ArrowLeft':
           handleMoveNext('left');
-          break;
-        case 'ArrowUp':
-          handleMoveNext('up');
           break;
         default:
           break;
@@ -167,8 +207,6 @@ function App() {
     if (Math.abs(dx) > Math.abs(dy)) {
       if (dx > 0) handleMoveNext('right');
       else handleMoveNext('left');
-    } else if (dy < 0) {
-      handleMoveNext('up');
     }
 
     setDragStart(null);
@@ -182,11 +220,14 @@ function App() {
       ...(newEnabled.man ? tiles.man : []),
       ...(newEnabled.pin ? tiles.pin : []),
       ...(newEnabled.sou ? tiles.sou : []),
+      ...(newEnabled.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : []),
       ...(newEnabled.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
-      ...(newEnabled.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : [])
+      ...(newEnabled.yaku ? yakuList : [])
     ];
     setRemainingCards(filtered);
-    setCurrentIndex(0);
+    const pos = findFirstEnabledPosition(filtered);
+    setRemainingCards(filtered);
+    setCurrentIndex(pos);
     setCorrectCount(0);
     setFlipped(false);
     setSwipeDirection(null);
@@ -205,7 +246,7 @@ function App() {
   );
 
   return (
-    <div className="container text-center mt-5">
+    <div className={`container text-center mt-5 ${highContrast ? 'high-contrast' : ''}`}>
       <img
         src={logoPath}
         alt="Yaku Up Logo"
@@ -235,24 +276,47 @@ function App() {
           onTouchEnd={(e) => handleDragEnd(e.changedTouches[0])}
         >
           <div className={`tile-inner ${flipped ? 'flipped' : ''}`}>
-            <div className="tile-face tile-front">
-              <div
-                className="tile-frame"
-                style={{ backgroundImage: `url(${frontFrame})` }}
-              >
-                <img
-                  src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/${currentCard.id}.png`}
-                  draggable={false}
-                  alt={currentCard.name}
-                  className="tile-img"
-                />
-              </div>
+            <div className="tile-face tile-front prevent-select">
+              {currentCard.id.startsWith('Man') ||
+                currentCard.id.startsWith('Pin') ||
+                currentCard.id.startsWith('Sou') ||
+                ['Ton', 'Nan', 'Shaa', 'Pei', 'Haku', 'Hatsu', 'Chun'].includes(currentCard.id) ? (
+                <div
+                  className="tile-frame yaku-card"
+                  style={{ backgroundImage: `url(${frontFrame})` }}
+                >
+                  <img
+                    src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/${currentCard.id}.png`}
+                    draggable={false}
+                    alt={currentCard.name}
+                    className="tile-img"
+                  />
+                </div>
+              ) : (
+                <div className="tile-frame d-flex justify-content-center align-items-center" style={{ backgroundImage: `url(${frontFrame})` }}>
+                  <p className="fs-3 yaku-text">{currentCard.name}</p>
+                </div>
+              )}
             </div>
 
             <div className="tile-face tile-back">
-              <h4 className="prevent-select">{currentCard.name}</h4>
-              <p className="fs-1 prevent-select">{currentCard.kanji}</p>
-              <p className="prevent-select">"{currentCard.romaji}"</p>
+              {currentCard.id.startsWith('Man') ||
+                currentCard.id.startsWith('Pin') ||
+                currentCard.id.startsWith('Sou') ||
+                ['Ton', 'Nan', 'Shaa', 'Pei', 'Haku', 'Hatsu', 'Chun'].includes(currentCard.id) ? (
+                <>
+                  <h4 className="prevent-select">{currentCard.name}</h4>
+                  <p className="fs-1 prevent-select">{currentCard.kanji}</p>
+                  <p className="prevent-select">"{currentCard.romaji}"</p>
+                </>
+              ) : (
+                <>
+                  <h4 className="prevent-select">{currentCard.kanji}</h4>
+                  <p className="prevent-select">"{currentCard.romaji}"</p>
+                  <p className="prevent-select">{currentCard.score}</p>
+                  <p className="prevent-select">{currentCard.description}</p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -278,67 +342,43 @@ function App() {
         )}
       </div>
 
-      {/* Tile set toggles */}
-      <div className="tile-set-toggle mt-5">
-        <div
-          className={`toggle-tile-frame ${!enabledSets.man ? 'disabled' : ''}`}
-          onClick={() => toggleSet('man')}
-          style={{ backgroundImage: `url(${frontFrame})` }}
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Man1.png`}
-            alt="Man"
-            className="toggle-tile"
-          />
-        </div>
+      <div className="button-row mt-5">
+        {['man', 'pin', 'sou', 'winds', 'dragons', 'yaku'].map((setName) => {
+          const sampleTileId = {
+            man: 'Man1',
+            pin: 'Pin1',
+            sou: 'Sou1',
+            winds: 'Ton',
+            dragons: 'Hatsu',
+            yaku: null
+          }[setName];
 
-        <div
-          className={`toggle-tile-frame ${!enabledSets.pin ? 'disabled' : ''}`}
-          onClick={() => toggleSet('pin')}
-          style={{ backgroundImage: `url(${frontFrame})` }}
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Pin1.png`}
-            alt="Pin"
-            className="toggle-tile"
-          />
-        </div>
-
-        <div
-          className={`toggle-tile-frame ${!enabledSets.sou ? 'disabled' : ''}`}
-          onClick={() => toggleSet('sou')}
-          style={{ backgroundImage: `url(${frontFrame})` }}
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Sou1.png`}
-            alt="Sou"
-            className="toggle-tile"
-          />
-        </div>
-
-        <div
-          className={`toggle-tile-frame ${!enabledSets.winds ? 'disabled' : ''}`}
-          onClick={() => toggleSet('winds')}
-          style={{ backgroundImage: `url(${frontFrame})` }}
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Ton.png`}
-            alt="Winds"
-            className="toggle-tile"
-          />
-        </div>
-
-        <div
-          className={`toggle-tile-frame ${!enabledSets.dragons ? 'disabled' : ''}`}
-          onClick={() => toggleSet('dragons')}
-          style={{ backgroundImage: `url(${frontFrame})` }}
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/Hatsu.png`}
-            alt="Dragons"
-            className="toggle-tile"
-          />
-        </div>
+          return (
+            <div
+              key={setName}
+              className="toggle-tile"
+              onClick={() => toggleSet(setName)}
+              style={{
+                opacity: enabledSets[setName] ? 1 : 0.3,
+                cursor: 'pointer'
+              }}
+            >
+              {sampleTileId ? (
+                <div className="toggle-tile-frame" style={{ backgroundImage: `url(${frontFrame})` }}>
+                  <img
+                    src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/${sampleTileId}.png`}
+                    className="tile-img"
+                    draggable={false}
+                  />
+                </div>
+              ) : (
+                <div className="toggle-tile-frame" style={{ backgroundImage: `url(${frontFrame})` }}>
+                  <p className="fs-6 mt-3 yaku-toggle-label"><b>YAKU</b></p>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <p className="text mt-2">

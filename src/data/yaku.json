@@ -1,0 +1,146 @@
+[
+  {
+    "id": "pinfu",
+    "name": "Minimum fu",
+    "kanji": "平和",
+    "romaji": "Pinfu",
+    "score": "1 Han",
+    "description": "A hand with all sequences and a valueless pair, no points for pair or waits."
+  },
+  {
+    "id": "tanyao",
+    "name": "All Simples",
+    "kanji": "断么九",
+    "romaji": "Tan-yao",
+    "score": "1 Han",
+    "description": "A hand made entirely of simple tiles (2-8) with no honors."
+  },
+  {
+    "id": "riichi",
+    "name": "Ready hand",
+    "kanji": "立直",
+    "romaji": "Riichi",
+    "score": "1 Han",
+    "description": "Declaring ready by placing a bet when one tile away from winning."
+  },
+  {
+    "id": "sanshoku_doujun",
+    "name": "Three-color straight",
+    "kanji": "三色同順",
+    "romaji": "Sanshoku Doujun",
+    "score": "2 Han",
+    "description": "A hand with the same sequence in all three suits."
+  },
+  {
+    "id": "ittsu",
+    "name": "Straight",
+    "kanji": "一気通貫",
+    "romaji": "Ittsu",
+    "score": "2 Han",
+    "description": "A hand with a straight from 1 to 9 in one suit."
+  },
+  {
+    "id": "toitoi",
+    "name": "All Triplets",
+    "kanji": "対々和",
+    "romaji": "Toi Toi",
+    "score": "2 Han",
+    "description": "A hand made entirely of triplets (or quads) and a pair."
+  },
+  {
+    "id": "sanshoku_doukou",
+    "name": "Three-color triplets",
+    "kanji": "三色同刻",
+    "romaji": "Sanshoku Doukou",
+    "score": "2 Han",
+    "description": "A hand with the same triplet in all three suits."
+  },
+  {
+    "id": "sankantsu",
+    "name": "Three Quads",
+    "kanji": "三槓子",
+    "romaji": "Sankantsu",
+    "score": "2 Han",
+    "description": "A hand with three quads."
+  },
+  {
+    "id": "chiitoitsu",
+    "name": "Seven Pairs",
+    "kanji": "七対子",
+    "romaji": "Chiitoitsu",
+    "score": "2 Han",
+    "description": "A hand made entirely of seven distinct pairs."
+  },
+  {
+    "id": "shousangen",
+    "name": "Little Three Dragons",
+    "kanji": "小三元",
+    "romaji": "Shousangen",
+    "score": "2 Han",
+    "description": "A hand with two dragon triplets and a pair of the third dragon."
+  },
+  {
+    "id": "honitsu",
+    "name": "Half Flush",
+    "kanji": "混一色",
+    "romaji": "Honitsu",
+    "score": "3 Han",
+    "description": "A hand made up of tiles from one suit and honors."
+  },
+  {
+    "id": "chinitsu",
+    "name": "Full Flush",
+    "kanji": "清一色",
+    "romaji": "Chinitsu",
+    "score": "6 Han",
+    "description": "A hand made up entirely of tiles from one suit."
+  },
+  {
+    "id": "yakuman_kokushi",
+    "name": "Thirteen Orphans",
+    "kanji": "国士無双",
+    "romaji": "Kokushi Musou",
+    "score": "Yakuman",
+    "description": "A hand with one of each terminal and honor, plus one duplicate of any of them."
+  },
+  {
+    "id": "daisangen",
+    "name": "Big Three Dragons",
+    "kanji": "大三元",
+    "romaji": "Dai Sangen",
+    "score": "Yakuman",
+    "description": "A hand with three dragon triplets."
+  },
+  {
+    "id": "shousuushii",
+    "name": "Little Four Winds",
+    "kanji": "小四喜",
+    "romaji": "Shou Suu Shii",
+    "score": "Yakuman",
+    "description": "A hand with three wind triplets and a pair of the fourth wind."
+  },
+  {
+    "id": "daisuushii",
+    "name": "Big Four Winds",
+    "kanji": "大四喜",
+    "romaji": "Dai Suu Shii",
+    "score": "Yakuman",
+    "description": "A hand with four wind triplets."
+  },
+  {
+    "id": "tsuisou",
+    "name": "All Honors",
+    "kanji": "字一色",
+    "romaji": "Tsui Sou",
+    "score": "Yakuman",
+    "description": "A hand made up entirely of honor tiles."
+  },
+  {
+    "id": "chinroutou",
+    "name": "All Terminals",
+    "kanji": "清老頭",
+    "romaji": "Chinroutou",
+    "score": "Yakuman",
+    "description": "A hand made up entirely of terminal tiles (1s and 9s)."
+  }
+]
