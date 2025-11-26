@@ -1,16 +1,28 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import tiles from './data/tiles.json';
-import yakuList from './data/yaku.json';
+import yaku from './data/yaku.json';
 import './App.css';
 
+import Logo from './components/Logo';
+import ContrastToggle from './components/ContrastToggle';
+import ProgressText from './components/ProgressText';
+import Flashcard from './components/Flashcard';
+import DoneCard from './components/DoneCard';
+import ControlButtons from './components/ControlButtons';
+import SetToggles from './components/SetToggles';
+
 function App() {
+  // ---- UI / Card State ----
   const [flipped, setFlipped] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [logoClicked, setLogoClicked] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [remainingCards, setRemainingCards] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [shuffled, setShuffled] = useState(false);
+
   const [dragStart, setDragStart] = useState(null);
   const [dragging, setDragging] = useState(false);
 
@@ -25,32 +37,55 @@ function App() {
 
   const cardRef = useRef(null);
 
-  const allFlashcards = [
-    ...tiles.man,
-    ...tiles.pin,
-    ...tiles.sou,
-    ...tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)),
-    ...tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)),
-    ...yakuList
-  ];
-
-  const filterEnabledCards = () => {
+  // ---- enabled cards ----
+  const enabledCards = useMemo(() => {
     return [
       ...(enabledSets.man ? tiles.man : []),
       ...(enabledSets.pin ? tiles.pin : []),
       ...(enabledSets.sou ? tiles.sou : []),
-      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : []),
-      ...(enabledSets.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
-      ...(enabledSets.yaku ? yakuList : [])
+      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton','Nan','Shaa','Pei'].includes(t.id)) : []),
+      ...(enabledSets.dragons ? tiles.honors.filter(t => ['Chun','Haku','Hatsu'].includes(t.id)) : []),
+      ...(enabledSets.yaku ? yaku : [])
     ];
+  }, [enabledSets]);
+
+  const totalCards = enabledCards.length;
+
+  const shuffleArray = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   };
 
-  const [remainingCards, setRemainingCards] = useState(filterEnabledCards());
-  const totalCards = filterEnabledCards().length;
-  const currentCard = remainingCards[currentIndex] || null;
+  const findFirstEnabledPosition = (cards) => {
+    const enabledIds = new Set(enabledCards.map(c => c.id));
+    for (let i = 0; i < cards.length; i++) {
+      if (enabledIds.has(cards[i].id)) return i;
+    }
+    return -1;
+  };
 
+  // reset deck when sets change
+  useEffect(() => {
+    setRemainingCards(enabledCards);
+    setCurrentIndex(enabledCards.length > 0 ? 0 : -1);
+    setCorrectCount(0);
+    setFlipped(false);
+    setSwipeDirection(null);
+    setShuffled(false);
+  }, [enabledCards]);
+
+  const currentCard =
+    currentIndex >= 0 && currentIndex < remainingCards.length
+      ? remainingCards[currentIndex]
+      : null;
+
+  // ---- Handlers ----
   const handleFlip = () => {
-    if (!dragging) setFlipped(prev => !prev);
+    if (!dragging) setFlipped(f => !f);
   };
 
   const handleMoveNext = (direction) => {
@@ -60,19 +95,22 @@ function App() {
     setFlipped(false);
 
     setTimeout(() => {
-      let newCards = [...remainingCards];
+      const newCards = [...remainingCards];
 
       if (direction === 'right') {
         newCards.splice(currentIndex, 1);
-        setCorrectCount(prev => prev + 1);
+        setCorrectCount(c => c + 1);
       } else {
         newCards.push(newCards.splice(currentIndex, 1)[0]);
       }
 
-      setRemainingCards(newCards);
       const nextPos = findFirstEnabledPosition(newCards);
+
+      setRemainingCards(newCards);
       setCurrentIndex(nextPos);
       setSwipeDirection(null);
+
+      if (nextPos === -1) setCurrentIndex(-1);
     }, 150);
   };
 
@@ -81,14 +119,11 @@ function App() {
     setTimeout(() => setLogoClicked(false), 600);
   };
 
-  const toggleContrast = () => setHighContrast(prev => !prev);
+  const toggleContrast = () => setHighContrast(c => !c);
 
   const resetProgress = () => {
-    const filtered = filterEnabledCards();
-    setRemainingCards(filtered);
-    const pos = findFirstEnabledPosition(filtered);
-    setRemainingCards(filtered);
-    setCurrentIndex(pos);
+    setRemainingCards(enabledCards);
+    setCurrentIndex(enabledCards.length > 0 ? 0 : -1);
     setCorrectCount(0);
     setFlipped(false);
     setSwipeDirection(null);
@@ -99,28 +134,29 @@ function App() {
     setFlipped(false);
 
     setTimeout(() => {
-      const enabledIds = new Set(filterEnabledCards().map(c => c.id));
+      const runtime = [...remainingCards];
+      const enabledIdSet = new Set(enabledCards.map(c => c.id));
       const enabledPositions = [];
-      for (let i = 0; i < remainingCards.length; i++) {
-        if (enabledIds.has(remainingCards[i].id)) enabledPositions.push(i);
-      }
 
-      let newCards = [...remainingCards];
+      for (let i = 0; i < runtime.length; i++)
+        if (enabledIdSet.has(runtime[i].id)) enabledPositions.push(i);
+
+      let newRuntime = [...runtime];
 
       if (!shuffled) {
-        // shuffle only enabled cards
-        const enabledCards = enabledPositions.map(i => remainingCards[i]);
-        for (let i = enabledCards.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [enabledCards[i], enabledCards[j]] = [enabledCards[j], enabledCards[i]];
-        }
-        enabledPositions.forEach((pos, idx) => { newCards[pos] = enabledCards[idx]; });
+        const enabledOnly = enabledPositions.map(i => runtime[i]);
+        const shuffledEnabled = shuffleArray(enabledOnly);
+        enabledPositions.forEach((pos, idx) => {
+          newRuntime[pos] = shuffledEnabled[idx];
+        });
       } else {
-        // unshuffle: restore natural order for enabled cards only
-        const naturalOrder = filterEnabledCards();
-        const naturalIndex = Object.fromEntries(naturalOrder.map((c, idx) => [c.id, idx]));
-        const enabledCards = enabledPositions.map(i => remainingCards[i]);
-        enabledCards.sort((a, b) => {
+        const naturalIndex = Object.fromEntries(
+          enabledCards.map((c, idx) => [c.id, idx])
+        );
+
+        const enabledOnly = enabledPositions.map(i => runtime[i]);
+
+        enabledOnly.sort((a, b) => {
           const ai = naturalIndex[a.id];
           const bi = naturalIndex[b.id];
           if (ai === undefined && bi === undefined) return 0;
@@ -128,38 +164,28 @@ function App() {
           if (bi === undefined) return -1;
           return ai - bi;
         });
-        enabledPositions.forEach((pos, idx) => { newCards[pos] = enabledCards[idx]; });
+
+        enabledPositions.forEach((pos, idx) => {
+          newRuntime[pos] = enabledOnly[idx];
+        });
       }
 
-      setRemainingCards(newCards);
-      const nextPos = findFirstEnabledPosition(newCards);
+      const nextPos = findFirstEnabledPosition(newRuntime);
+      setRemainingCards(newRuntime);
       setCurrentIndex(nextPos);
-      setShuffled(prev => !prev);
+      setShuffled(s => !s);
+      if (nextPos === -1) setCurrentIndex(-1);
     }, 150);
   };
 
-
-  const findFirstEnabledPosition = (cards) => {
-    const enabledIds = new Set(filterEnabledCards().map(c => c.id));
-    for (let i = 0; i < cards.length; i++) {
-      if (enabledIds.has(cards[i].id)) return i;
-    }
-    return -1;
+  const toggleSet = (setName) => {
+    setEnabledSets(prev => ({ ...prev, [setName]: !prev[setName] }));
   };
 
-  useEffect(() => {
-    const pos = findFirstEnabledPosition(remainingCards);
-    setCurrentIndex(pos);
-  }, [remainingCards, enabledSets]);
-
-  const tileFolder = highContrast ? 'dark' : 'regular';
-  const frontFrame = `${import.meta.env.BASE_URL}/tiles/${tileFolder}/Front.png`;
-  const logoPath = `${import.meta.env.BASE_URL}/logo.png`;
-
-  // Keyboard controls
+  // ---- keyboard ----
   useEffect(() => {
     const handleKey = (e) => {
-      if (!currentCard) return;
+      if (currentIndex === -1) return;
 
       switch (e.code) {
         case 'Space':
@@ -172,16 +198,14 @@ function App() {
         case 'ArrowLeft':
           handleMoveNext('left');
           break;
-        default:
-          break;
       }
     };
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [currentCard, swipeDirection, dragging]);
+  }, [remainingCards, currentIndex, swipeDirection, dragging]);
 
-  // Drag handlers
+  // ---- drag handlers ----
   const handleDragStart = (e) => {
     setDragStart({ x: e.clientX, y: e.clientY });
     setDragging(false);
@@ -213,177 +237,54 @@ function App() {
     setDragging(false);
   };
 
-  const toggleSet = (setName) => {
-    const newEnabled = { ...enabledSets, [setName]: !enabledSets[setName] };
-    setEnabledSets(newEnabled);
-    const filtered = [
-      ...(newEnabled.man ? tiles.man : []),
-      ...(newEnabled.pin ? tiles.pin : []),
-      ...(newEnabled.sou ? tiles.sou : []),
-      ...(newEnabled.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : []),
-      ...(newEnabled.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
-      ...(newEnabled.yaku ? yakuList : [])
-    ];
-    setRemainingCards(filtered);
-    const pos = findFirstEnabledPosition(filtered);
-    setRemainingCards(filtered);
-    setCurrentIndex(pos);
-    setCorrectCount(0);
-    setFlipped(false);
-    setSwipeDirection(null);
-  };
-
-  const renderDoneCard = () => (
-    <div className="tile-card done-card">
-      <div className="tile-inner">
-        <div className="tile-face tile-front">
-
-          <p className="fs-4 mt-4 done-card-text"><b>Congrats! 🎉</b><br /><br /><i>Reset Progress</i> or enable new sets <br />to keep learning.</p>
-
-        </div>
-      </div>
-    </div>
-  );
+  const tileFolder = highContrast ? 'dark' : 'regular';
+  const frontFrame = `${import.meta.env.BASE_URL}/tiles/${tileFolder}/Front.png`;
+  const logoPath = `${import.meta.env.BASE_URL}/logo.png`;
 
   return (
     <div className={`container text-center mt-5 ${highContrast ? 'high-contrast' : ''}`}>
-      <img
-        src={logoPath}
-        alt="Yaku Up Logo"
-        className={`logo ${logoClicked ? 'sway' : ''}`}
-        onClick={handleLogoClick}
-      />
+      <Logo src={logoPath} clicked={logoClicked} onClick={handleLogoClick} />
+      <ContrastToggle highContrast={highContrast} toggle={toggleContrast} />
 
-      <button className="contrast-toggle" onClick={toggleContrast}>
-        {highContrast ? '🌙' : '☀️'}
-      </button>
-
-      <p className="progress-text">
-        Progress: {correctCount} / {totalCards}
-      </p>
+      <ProgressText correct={correctCount} total={totalCards} />
 
       {currentCard ? (
-        <div
-          className={`tile-card ${swipeDirection ? `swipe-${swipeDirection}` : ''}`}
-          onClick={handleFlip}
-          ref={cardRef}
-          onMouseDown={handleDragStart}
-          onMouseMove={handleDragMove}
-          onMouseUp={handleDragEnd}
-          onMouseLeave={handleDragEnd}
-          onTouchStart={(e) => handleDragStart(e.touches[0])}
-          onTouchMove={(e) => handleDragMove(e.touches[0])}
-          onTouchEnd={(e) => handleDragEnd(e.changedTouches[0])}
-        >
-          <div className={`tile-inner ${flipped ? 'flipped' : ''}`}>
-            <div className="tile-face tile-front prevent-select">
-              {currentCard.id.startsWith('Man') ||
-                currentCard.id.startsWith('Pin') ||
-                currentCard.id.startsWith('Sou') ||
-                ['Ton', 'Nan', 'Shaa', 'Pei', 'Haku', 'Hatsu', 'Chun'].includes(currentCard.id) ? (
-                <div
-                  className="tile-frame yaku-card"
-                  style={{ backgroundImage: `url(${frontFrame})` }}
-                >
-                  <img
-                    src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/${currentCard.id}.png`}
-                    draggable={false}
-                    alt={currentCard.name}
-                    className="tile-img"
-                  />
-                </div>
-              ) : (
-                <div className="tile-frame d-flex justify-content-center align-items-center" style={{ backgroundImage: `url(${frontFrame})` }}>
-                  <p className="fs-3 yaku-text">{currentCard.name}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="tile-face tile-back">
-              {currentCard.id.startsWith('Man') ||
-                currentCard.id.startsWith('Pin') ||
-                currentCard.id.startsWith('Sou') ||
-                ['Ton', 'Nan', 'Shaa', 'Pei', 'Haku', 'Hatsu', 'Chun'].includes(currentCard.id) ? (
-                <>
-                  <h4 className="prevent-select">{currentCard.name}</h4>
-                  <p className="fs-1 prevent-select">{currentCard.kanji}</p>
-                  <p className="prevent-select">"{currentCard.romaji}"</p>
-                </>
-              ) : (
-                <>
-                  <h4 className="prevent-select">{currentCard.kanji}</h4>
-                  <p className="prevent-select">"{currentCard.romaji}"</p>
-                  <p className="prevent-select">{currentCard.score}</p>
-                  <p className="prevent-select">{currentCard.description}</p>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <Flashcard
+          card={currentCard}
+          flipped={flipped}
+          swipeDirection={swipeDirection}
+          onFlip={handleFlip}
+          onDragStart={handleDragStart}
+          onDragMove={handleDragMove}
+          onDragEnd={handleDragEnd}
+          cardRef={cardRef}
+          tileFolder={tileFolder}
+          frontFrame={frontFrame}
+        />
       ) : (
-        renderDoneCard()
+        <DoneCard />
       )}
 
       {currentCard && (
         <p className="text mt-3">
-          Click the tile or press Space to flip.<br />Use arrow keys or drag the tile to mark correct (right) / incorrect (left).
+          Click the tile or press Space to flip.<br />
+          Use arrow keys or drag the tile to mark correct / incorrect.
         </p>
       )}
 
-      <div className="button-row">
-        <button className="reset-btn" onClick={resetProgress}>
-          Reset Progress
-        </button>
+      <ControlButtons
+        currentCard={currentCard}
+        shuffled={shuffled}
+        onReset={resetProgress}
+        onShuffle={toggleShuffle}
+      />
 
-        {currentCard && (
-          <button className="shuffle-btn" onClick={toggleShuffle}>
-            {shuffled ? '🔁 Unshuffle' : '🔀 Shuffle'}
-          </button>
-        )}
-      </div>
-
-      <div className="button-row mt-5">
-        {['man', 'pin', 'sou', 'winds', 'dragons', 'yaku'].map((setName) => {
-          const sampleTileId = {
-            man: 'Man1',
-            pin: 'Pin1',
-            sou: 'Sou1',
-            winds: 'Ton',
-            dragons: 'Hatsu',
-            yaku: null
-          }[setName];
-
-          return (
-            <div
-              key={setName}
-              className="toggle-tile"
-              onClick={() => toggleSet(setName)}
-              style={{
-                opacity: enabledSets[setName] ? 1 : 0.3,
-                cursor: 'pointer'
-              }}
-            >
-              {sampleTileId ? (
-                <div className="toggle-tile-frame" style={{ backgroundImage: `url(${frontFrame})` }}>
-                  <img
-                    src={`${import.meta.env.BASE_URL}/tiles/${tileFolder}/${sampleTileId}.png`}
-                    className="tile-img"
-                    draggable={false}
-                  />
-                </div>
-              ) : (
-                <div className="toggle-tile-frame" style={{ backgroundImage: `url(${frontFrame})` }}>
-                  <p className="fs-6 mt-3 yaku-toggle-label"><b>YAKU</b></p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <p className="text mt-2">
-        WARNING: Enabling or disabling sets will reset your progress.
-      </p>
+      <SetToggles
+        enabledSets={enabledSets}
+        toggleSet={toggleSet}
+        tileFolder={tileFolder}
+        frontFrame={frontFrame}
+      />
     </div>
   );
 }
