@@ -25,9 +25,10 @@ function App() {
   const [correctCount, setCorrectCount] = useState(0);
   const [shuffled, setShuffled] = useState(false);
 
-  // No user interaction yet, so no swipe direction.
+  // No user interaction yet, so no swipe direction or feedback.
   const [dragStart, setDragStart] = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   // By default, all sets are enabled.
   const [enabledSets, setEnabledSets] = useState({
@@ -95,27 +96,36 @@ function App() {
   const handleMoveNext = (direction) => {
     if (!currentCard || swipeDirection) return;
 
-    setSwipeDirection(direction);
+    // Visual feedback (green = correct, red = incorrect)
+    const feedbackClass = direction === 'right' ? 'feedback-correct' : 'feedback-incorrect';
+    setSwipeDirection(null);          // ensure swipe class not active yet
     setFlipped(false);
+    setFeedback(feedbackClass);       // NEW: trigger flash effect
 
+    // Step 1 — play the flash animation
     setTimeout(() => {
-      const newCards = [...remainingCards];
+      setFeedback(null);              // remove flash
+      setSwipeDirection(direction);   // now start swipe animation
 
-      if (direction === 'right') {
-        newCards.splice(currentIndex, 1);
-        setCorrectCount(c => c + 1);
-      } else {
-        newCards.push(newCards.splice(currentIndex, 1)[0]);
-      }
+      // Step 2 — after swipe, modify deck
+      setTimeout(() => {
+        const newCards = [...remainingCards];
 
-      const nextPos = findFirstEnabledPosition(newCards);
+        if (direction === 'right') {
+          newCards.splice(currentIndex, 1);
+          setCorrectCount(c => c + 1);
+        } else {
+          newCards.push(newCards.splice(currentIndex, 1)[0]);
+        }
 
-      setRemainingCards(newCards);
-      setCurrentIndex(nextPos);
-      setSwipeDirection(null);
+        const nextPos = findFirstEnabledPosition(newCards);
+        setRemainingCards(newCards);
+        setCurrentIndex(nextPos);
+        setSwipeDirection(null);
 
-      if (nextPos === -1) setCurrentIndex(-1);
-    }, 150);
+        if (nextPos === -1) setCurrentIndex(-1);
+      }, 350); // swipe animation duration
+    }, 300); // flash duration
   };
 
   const handleLogoClick = () => {
@@ -260,6 +270,7 @@ function App() {
           card={currentCard}
           flipped={flipped}
           swipeDirection={swipeDirection}
+          feedback={feedback}
           onFlip={handleFlip}
           onDragStart={handleDragStart}
           onDragMove={handleDragMove}

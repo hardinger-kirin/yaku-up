@@ -115,6 +115,29 @@
   transition: transform 0.6s ease, opacity 0.6s ease;
 }
 
+/* FEEDBACK ANIMATIONS */
+
+.feedback-correct {
+  animation: flash-correct 0.3s ease;
+}
+
+.feedback-incorrect {
+  animation: flash-incorrect 0.3s ease;
+}
+
+@keyframes flash-correct {
+  0%   { box-shadow: 0 0 0px 0 rgba(0,255,0,0); }
+  40%  { box-shadow: 0 0 25px 10px rgba(0,255,0,0.45); }
+  100% { box-shadow: 0 0 0px 0 rgba(0,255,0,0); }
+}
+
+@keyframes flash-incorrect {
+  0%   { box-shadow: 0 0 0px 0 rgba(255,0,0,0); }
+  40%  { box-shadow: 0 0 25px 10px rgba(255,0,0,0.45); }
+  100% { box-shadow: 0 0 0px 0 rgba(255,0,0,0); }
+}
+
+
 /* PREVENT TEXT SELECTION */
 .prevent-select {
   -webkit-user-select: none; /* Safari */

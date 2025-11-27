@@ -11,6 +11,7 @@ export default function Flashcard({
   card,
   flipped,
   swipeDirection,
+  feedback,
   onFlip,
   onDragStart,
   onDragMove,
@@ -27,7 +28,10 @@ export default function Flashcard({
 
   return (
     <div
-      className={`tile-card ${swipeDirection ? `swipe-${swipeDirection}` : ''}`}
+      className={`tile-card 
+        ${swipeDirection ? `swipe-${swipeDirection}` : ''} 
+        ${feedback || ''}
+      `}
       onClick={onFlip}
       ref={cardRef}
       onMouseDown={onDragStart}
@@ -84,3 +88,4 @@ export default function Flashcard({
     </div>
   );
 }
+
