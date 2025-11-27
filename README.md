@@ -1,16 +1,35 @@
-# React + Vite
+# 🀄 Yaku Up!
+### *Learn Riichi Mahjong tiles & yaku.*
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Yaku Up!** is an interactive, web-based learning tool designed to help players of all levels memorize **tile names** and **hand patterns (yaku)** from Japanese **Riichi Mahjong**. Whether you're brand new to the game or expanding your knowledge, Yaku Up! provides a focused way to practice.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Features
 
-## React Compiler
+### 🀄 Flashcard Learning  
+Study each Mahjong tile and yaku one at a time using a clean flashcard interface:
+- Flip flashcards with a click or press of the Spacebar
+- Indicate you remembered a flashcard by dragging the card to the right or pressing the right arrow key
+- Indicate you need more practice by dragging the card to the left or pressing the left arrow key
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🎛️ Category Toggles  
+Customize your study session:  
+- Enable or disable specific suits of tiles
+- Enable or disable studying common yaku  
+- Only enabled sets appear in your deck  
 
-## Expanding the ESLint configuration
+### 🔀 Smart Shuffle  
+Mix up your study deck — without losing your progress: 
+- Shuffle only *enabled* sets  
+- Turning shuffle off restores natural order  
+- Removed cards stay removed across shuffles  
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🎯 Progress Tracking  
+Track your session effortlessly:  
+- A progress indicator shows how many cards you’ve completed out of the total cards in your enabled sets
+- Disabled sets never interfere  
+- Reset your progress at any time to start fresh
+
+### 💡 Correct / Incorrect Feedback  
+Smooth, clear animations reinforce what you got ✔️ right or ❌ wrong
