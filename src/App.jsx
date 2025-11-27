@@ -12,20 +12,24 @@ import ControlButtons from './components/ControlButtons';
 import SetToggles from './components/SetToggles';
 
 function App() {
-  // ---- UI / Card State ----
+  // ---- UI and Initial Card State ----
+  // By default, cards are unflipped (showing the front face), normal contrast mode, and logo is unclicked.
   const [flipped, setFlipped] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [logoClicked, setLogoClicked] = useState(false);
 
+  // By default, the sets are unshuffled.
   const [remainingCards, setRemainingCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [shuffled, setShuffled] = useState(false);
 
+  // No user interaction yet, so no swipe direction.
   const [dragStart, setDragStart] = useState(null);
   const [dragging, setDragging] = useState(false);
 
+  // By default, all sets are enabled.
   const [enabledSets, setEnabledSets] = useState({
     man: true,
     pin: true,
@@ -37,20 +41,22 @@ function App() {
 
   const cardRef = useRef(null);
 
-  // ---- enabled cards ----
+  // By default, all enabled cards are included.
   const enabledCards = useMemo(() => {
     return [
       ...(enabledSets.man ? tiles.man : []),
       ...(enabledSets.pin ? tiles.pin : []),
       ...(enabledSets.sou ? tiles.sou : []),
-      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton','Nan','Shaa','Pei'].includes(t.id)) : []),
-      ...(enabledSets.dragons ? tiles.honors.filter(t => ['Chun','Haku','Hatsu'].includes(t.id)) : []),
+      ...(enabledSets.winds ? tiles.honors.filter(t => ['Ton', 'Nan', 'Shaa', 'Pei'].includes(t.id)) : []),
+      ...(enabledSets.dragons ? tiles.honors.filter(t => ['Chun', 'Haku', 'Hatsu'].includes(t.id)) : []),
       ...(enabledSets.yaku ? yaku : [])
     ];
   }, [enabledSets]);
 
   const totalCards = enabledCards.length;
+  // ---- END UI / Card State ----
 
+  // ---- Handlers and helpers ----
   const shuffleArray = (arr) => {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -68,7 +74,6 @@ function App() {
     return -1;
   };
 
-  // reset deck when sets change
   useEffect(() => {
     setRemainingCards(enabledCards);
     setCurrentIndex(enabledCards.length > 0 ? 0 : -1);
@@ -83,7 +88,6 @@ function App() {
       ? remainingCards[currentIndex]
       : null;
 
-  // ---- Handlers ----
   const handleFlip = () => {
     if (!dragging) setFlipped(f => !f);
   };
@@ -182,7 +186,7 @@ function App() {
     setEnabledSets(prev => ({ ...prev, [setName]: !prev[setName] }));
   };
 
-  // ---- keyboard ----
+  // ---- Keyboard input ----
   useEffect(() => {
     const handleKey = (e) => {
       if (currentIndex === -1) return;
@@ -205,7 +209,7 @@ function App() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [remainingCards, currentIndex, swipeDirection, dragging]);
 
-  // ---- drag handlers ----
+  // ---- Mouse / Touch Drag Handlers ----
   const handleDragStart = (e) => {
     setDragStart({ x: e.clientX, y: e.clientY });
     setDragging(false);
@@ -236,7 +240,10 @@ function App() {
     setDragStart(null);
     setDragging(false);
   };
+  // ---- END Mouse / Touch Drag Handlers ----
+  // ---- END Handlers and helpers ----
 
+  // ---- Rendering logic ----
   const tileFolder = highContrast ? 'dark' : 'regular';
   const frontFrame = `${import.meta.env.BASE_URL}/tiles/${tileFolder}/Front.png`;
   const logoPath = `${import.meta.env.BASE_URL}/logo.png`;
@@ -287,6 +294,7 @@ function App() {
       />
     </div>
   );
+  // ---- END Rendering logic ----
 }
 
 export default App;

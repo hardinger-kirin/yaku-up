@@ -1,3 +1,9 @@
+/*
+  Handles set toggles for enabling/disabling different tile and yaku sets.
+  Displays sample tile images (first tile in sequence of that set) or "YAKU" text on the toggles.
+  Warning text indicates that changing sets will reset progress.
+*/
+
 export default function SetToggles({
   enabledSets,
   toggleSet,

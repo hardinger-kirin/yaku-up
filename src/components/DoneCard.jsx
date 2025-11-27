@@ -1,3 +1,7 @@
+/*
+  Handles card displayed when all cards are done.
+*/
+
 export default function DoneCard() {
   return (
     <div className="tile-card done-card">

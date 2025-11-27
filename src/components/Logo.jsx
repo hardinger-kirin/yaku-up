@@ -1,3 +1,7 @@
+/*
+  Handles logo easter egg: clicking the logo triggers a sway animation.
+*/
+
 export default function Logo({ src, clicked, onClick }) {
   return (
     <img

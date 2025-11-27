@@ -1,3 +1,12 @@
+/*
+  Handles flashcard display and interactions (flipping, dragging).
+
+  Ensures users cannot select text/images while interacting with cards.
+
+  Displays tile images for tile cards, and text for yaku cards.
+  Uses different front frame and tile folder based on High Contrast mode.
+*/
+
 export default function Flashcard({
   card,
   flipped,
