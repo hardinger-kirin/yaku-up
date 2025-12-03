@@ -265,23 +265,47 @@ function App() {
 
       <ProgressText correct={correctCount} total={totalCards} />
 
-      {currentCard ? (
-        <Flashcard
-          card={currentCard}
-          flipped={flipped}
-          swipeDirection={swipeDirection}
-          feedback={feedback}
-          onFlip={handleFlip}
-          onDragStart={handleDragStart}
-          onDragMove={handleDragMove}
-          onDragEnd={handleDragEnd}
-          cardRef={cardRef}
-          tileFolder={tileFolder}
-          frontFrame={frontFrame}
-        />
-      ) : (
-        <DoneCard />
-      )}
+      {/* --- CARD STACK FOR SMOOTH TRANSITIONS --- */}
+      <div className="card-stack">
+        {currentCard && (
+          <>
+            {/* CURRENT CARD */}
+            <Flashcard
+              key={currentCard.id}
+              card={currentCard}
+              flipped={flipped}
+              swipeDirection={swipeDirection}
+              feedback={feedback}
+              onFlip={handleFlip}
+              onDragStart={handleDragStart}
+              onDragMove={handleDragMove}
+              onDragEnd={handleDragEnd}
+              cardRef={cardRef}
+              tileFolder={tileFolder}
+              frontFrame={frontFrame}
+            />
+
+            {/* NEXT CARD (hidden behind, fades in after swipe) */}
+            <div className="card-underlay">
+              {remainingCards[currentIndex + 1] && (
+                <Flashcard
+                  key={remainingCards[currentIndex + 1].id + '-next'}
+                  card={remainingCards[currentIndex + 1]}
+                  flipped={false}
+                  swipeDirection={null}
+                  feedback={null}
+                  cardRef={null}
+                  tileFolder={tileFolder}
+                  frontFrame={frontFrame}
+                />
+              )}
+            </div>
+          </>
+        )}
+
+        {!currentCard && <DoneCard />}
+      </div>
+
 
       {currentCard && (
         <p className="text mt-3">
