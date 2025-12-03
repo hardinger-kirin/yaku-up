@@ -34,9 +34,9 @@
   ],
   "honors": [
     { "id": "Ton", "name": "East Wind", "kanji": "東", "romaji": "Ton" },
-    { "id": "Shaa", "name": "South Wind", "kanji": "南", "romaji": "Nan" },
-    { "id": "Pei", "name": "West Wind", "kanji": "西", "romaji": "Shaa" },
-    { "id": "Nan", "name": "North Wind", "kanji": "北", "romaji": "Pei" },
+    { "id": "Nan", "name": "South Wind", "kanji": "南", "romaji": "Nan" },
+    { "id": "Shaa", "name": "West Wind", "kanji": "西", "romaji": "Shaa" },
+    { "id": "Pei", "name": "North Wind", "kanji": "北", "romaji": "Pei" },
     { "id": "Haku", "name": "White Dragon", "kanji": "白", "romaji": "Haku" },
     { "id": "Hatsu", "name": "Green Dragon", "kanji": "發", "romaji": "Hatsu" },
     { "id": "Chun", "name": "Red Dragon", "kanji": "中", "romaji": "Chun" }
