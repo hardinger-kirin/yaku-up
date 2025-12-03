@@ -29,6 +29,7 @@ function App() {
   const [dragStart, setDragStart] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const animatingRef = useRef(false);
 
   // By default, all sets are enabled.
   const [enabledSets, setEnabledSets] = useState({
@@ -94,7 +95,8 @@ function App() {
   };
 
   const handleMoveNext = (direction) => {
-    if (!currentCard || swipeDirection) return;
+    if (!currentCard || swipeDirection || animatingRef.current) return;
+    animatingRef.current = true;
 
     // Visual feedback (green = correct, red = incorrect)
     const feedbackClass = direction === 'right' ? 'feedback-correct' : 'feedback-incorrect';
@@ -126,6 +128,10 @@ function App() {
         if (nextPos === -1) setCurrentIndex(-1);
       }, 350); // swipe animation duration
     }, 300); // flash duration
+
+    setTimeout(() => {
+      animatingRef.current = false;
+    }, 650); // flash + swipe total duration
   };
 
   const handleLogoClick = () => {
