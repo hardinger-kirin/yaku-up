@@ -199,8 +199,8 @@
   position: absolute;
   top: 1rem;
   left: 1rem;
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   z-index: 100;
   cursor: pointer;
